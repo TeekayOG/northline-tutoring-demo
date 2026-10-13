@@ -1,0 +1,24 @@
+{
+  "name": "northline-tutoring-demo-api",
+  "version": "1.0.0",
+  "description": "REST API for the Northline Tutoring portal (public demo version, fake data only)",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:setup": "node scripts/setup-db.js",
+    "seed": "node scripts/seed.js"
+  },
+  "engines": { "node": ">=18" },
+  "private": true,
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.5"
+  }
+}

@@ -1,0 +1,630 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+:root {
+    --deep-navy: #0B1D34;
+    --icy-blue: #D6E4F2;
+    --light-stone: #F2F4F7;
+    --parchment: #F7F1E6;
+    --champagne: #C9A668;
+    
+    --text-main: #333333;
+    --danger: #dc2626;
+    --border: #e5e7eb;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--light-stone);
+    color: var(--text-main);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--deep-navy);
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 10px 25px -5px rgba(11, 29, 52, 0.1);
+    border-top: 5px solid var(--deep-navy);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--deep-navy);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    background-color: #fafafa;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--champagne);
+    box-shadow: 0 0 0 2px rgba(201, 166, 104, 0.2);
+}
+
+.btn {
+    width: 100%;
+    background-color: var(--champagne);
+    color: var(--deep-navy);
+    padding: 14px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #b5955d;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+    width: auto;
+    padding: 8px 16px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--icy-blue);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.error-msg {
+    color: var(--danger);
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+/* --- PROFESSIONAL APP LAYOUT --- */
+
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%; /* Swapped from 100vw to prevent scrollbar overlap */
+    position: absolute; /* Forces it to ignore the body's centering rule */
+    top: 0;
+    left: 0;
+    background-color: var(--light-stone);
+}
+
+/* 1. The Left Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--deep-navy);
+    color: white;
+    padding: 30px 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-brand {
+    padding: 0 25px 25px;
+    border-bottom: 1px solid rgba(214, 228, 242, 0.1); /* Icy blue transparent */
+    margin-bottom: 20px;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li a {
+    display: block;
+    padding: 15px 25px;
+    color: var(--icy-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav li a:hover, .sidebar-nav li a.active {
+    background-color: rgba(201, 166, 104, 0.1); /* Champagne transparent */
+    border-left: 4px solid var(--champagne);
+    color: white;
+}
+
+/* 2. The Main Content Area */
+.main-area {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+/* 3. Summary Top Cards */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: white;
+    padding: 30px;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.summary-card h4 {
+    margin: 0 0 15px 0;
+    color: #666;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.summary-card .number {
+    font-size: 42px;
+    font-weight: 400;
+    color: var(--deep-navy);
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+}
+
+/* 4. Data Tables */
+.table-panel {
+    background: white;
+    border-radius: 4px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.table-panel h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: var(--deep-navy);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
+}
+
+.app-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.app-table th {
+    text-align: left;
+    padding: 12px;
+    color: #666;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.app-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid var(--light-stone);
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.app-table tr:hover td {
+    background-color: #fafafa;
+}
+
+.icon-btn {
+    background: var(--icy-blue);
+    color: var(--deep-navy);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.icon-btn:hover {
+    background: var(--champagne);
+    color: white;
+}
+
+/* --- CALENDAR SKELETON --- */
+.calendar-panel {
+    background: white;
+    border-radius: 4px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.cal-header-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: white;
+    border-bottom: 2px solid var(--border);
+}
+
+.cal-header-cell {
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--deep-navy);
+    font-size: 14px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--border); /* Creates the grid lines */
+    gap: 1px; /* The thickness of the grid lines */
+    border: 1px solid var(--border);
+}
+
+.cal-day {
+    background: white;
+    min-height: 120px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cal-day.disabled {
+    background: #f9fafa;
+    color: #aaa;
+}
+
+.cal-date {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.cal-event {
+    background: var(--deep-navy);
+    color: white;
+    font-size: 11px;
+    padding: 6px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border-left: 3px solid var(--champagne);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.button-group .btn {
+    width: auto;
+    padding: 8px 16px;
+    border-radius: 0;
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
+.button-group .btn:first-child { border-radius: 4px 0 0 4px; }
+.button-group .btn:last-child { border-radius: 0 4px 4px 0; border-right: none; }
+
+/* --- STUDENT PROFILE SKELETON --- */
+.profile-header {
+    margin-bottom: 25px;
+}
+
+.profile-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 25px;
+}
+
+.profile-tab {
+    padding: 12px 25px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+
+.profile-tab.active {
+    color: var(--deep-navy);
+    border-bottom: 3px solid var(--deep-navy);
+    font-weight: 600;
+}
+
+.profile-tab:hover:not(.active) {
+    color: var(--champagne);
+}
+
+.profile-section {
+    background: white;
+    border-radius: 4px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    margin-bottom: 25px;
+}
+
+.profile-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: var(--deep-navy);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.profile-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    background: #fafafa;
+}
+
+.profile-input:disabled {
+    background: #f1f3f5;
+    color: #555;
+}
+
+.profile-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+/* --- INVOICES SKELETON --- */
+.invoice-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.invoice-document {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.invoice-header {
+    background: var(--deep-navy);
+    color: white;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.invoice-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 30px;
+    border-bottom: 2px solid var(--border);
+    background: #fafafa;
+}
+
+.meta-block h4 {
+    margin: 0 0 10px 0;
+    color: var(--text-main);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.meta-block p {
+    margin: 4px 0;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.meta-block .large-text {
+    font-size: 20px;
+    color: var(--deep-navy);
+    font-family: 'Playfair Display', serif;
+}
+
+.invoice-totals {
+    background: #fafafa;
+    padding: 30px;
+    border-top: 2px solid var(--border);
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.total-row.highlight {
+    background: var(--champagne);
+    color: white;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+/* --- PREMIUM ACTION BUTTONS & TEXT --- */
+.student-name {
+    color: var(--deep-navy);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.btn-approve {
+    background: rgba(201, 166, 104, 0.15); /* Soft Champagne background */
+    color: var(--champagne);
+    border: 1px solid var(--champagne);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.btn-approve:hover {
+    background: var(--champagne);
+    color: white;
+}
+
+.btn-decline {
+    background: transparent;
+    color: #888;
+    border: 1px solid #ccc;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.btn-decline:hover {
+    background: #fff0f0;
+    color: #d9534f; /* Soft danger red */
+    border-color: #d9534f;
+}
+
+/* --- PREMIUM DASHBOARD UPDATES --- */
+
+/* 1. Upgrade grid from 3 to 4 columns */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+/* 2. Visual styling for Projected Income */
+.summary-card.projected {
+    background-color: transparent;
+    border: 2px dashed var(--champagne);
+    box-shadow: none;
+}
+.summary-card.projected h4 {
+    color: #888;
+}
+.summary-card.projected .number {
+    color: var(--champagne);
+}
+
+/* 3. Premium Table UI */
+.student-name {
+    color: var(--deep-navy);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.btn-approve {
+    background: rgba(201, 166, 104, 0.15); 
+    color: var(--champagne);
+    border: 1px solid var(--champagne);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+.btn-approve:hover {
+    background: var(--champagne);
+    color: white;
+}
+.btn-decline {
+    background: transparent;
+    color: #888;
+    border: 1px solid #ccc;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+.btn-decline:hover {
+    background: #fff0f0;
+    color: #d9534f;
+    border-color: #d9534f;
+}
+
+/* --- MODAL ENGINE --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 25, 47, 0.4); /* Deep Navy with transparency */
+    backdrop-filter: blur(4px); /* Premium blur effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensures it sits on top of everything */
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-box {
+    background: white;
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.hidden .modal-box {
+    transform: translateY(-20px);
+}
