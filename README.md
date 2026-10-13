@@ -4,6 +4,20 @@ A full-stack, role-based tutoring management portal. Students, tutors, and admin
 
 > **About this repo:** This is the **public demo version** of the Northline Tutoring portal, a client product I designed, built, and maintain. The production code is private. This copy contains **no sensitive information**: no credentials or secrets, no real user, student, or business data, and no production URLs. It runs entirely on fake seed data, while keeping the same architecture and features as the real system.
 
+## Screenshots
+
+**Tutor dashboard.** Income and hours at a glance, with sessions split into upcoming and awaiting feedback.
+
+![Tutor dashboard](docs/tutor-dashboard.png)
+
+**Session calendar.** Month view with colour-coded sessions and blocked time.
+
+![Tutor calendar](docs/tutor-calendar.png)
+
+| Login | Student portal | Admin control center |
+|---|---|---|
+| ![Login](docs/login.png) | ![Student portal](docs/student-portal.png) | ![Admin dashboard](docs/admin-dashboard.png) |
+
 ## Features
 
 **Tutors**
