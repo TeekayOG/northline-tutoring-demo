@@ -212,96 +212,28 @@
                 <!-- VIEW 3: STUDENT PROFILES (The New Skeleton) -->
                 <main id="tutor-view-profiles" class="main-area hidden">
                     <div class="dashboard-header" style="border-bottom: none; margin-bottom: 10px;">
-                        <h2 style="margin: 0; font-size: 28px;">Logan Porter</h2>
+                        <h2 style="margin: 0; font-size: 28px;">Student Profiles</h2>
                         <button class="logout-btn btn btn-danger">Log Out</button>
                     </div>
+                    <p style="color: #666; margin-top: 0;">Students you have sessions with. Click a student to see their sessions.</p>
 
-                    <!-- The Tabs -->
-                    <div class="profile-tabs">
-                        <button class="profile-tab active">👤 General Info</button>
-                        <button class="profile-tab">📝 Review Notes</button>
-                        <button class="profile-tab">🎓 Programs</button>
-                    </div>
-
-                    <!-- Section 1: Student Information -->
                     <div class="profile-section">
-                        <h3>Student Information</h3>
-                        <div class="form-grid">
-                            <div>
-                                <label class="profile-label">Name</label>
-                                <input type="text" class="profile-input" value="Student One" disabled>
-                            </div>
-                            <div>
-                                <label class="profile-label">Phonetic Name</label>
-                                <input type="text" class="profile-input" placeholder="e.g. JAYN doh">
-                            </div>
-                            <div>
-                                <label class="profile-label">Gender</label>
-                                <select class="profile-input">
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 2: Client Contact Info -->
-                    <div class="profile-section">
-                        <h3>Client Contact Info</h3>
                         <table class="app-table">
                             <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Relation</th>
-                                    <th>Type</th>
-                                    <th>Info</th>
-                                </tr>
+                                <tr><th>Student</th><th>Total</th><th>Completed</th><th>Upcoming</th><th>Last Session</th></tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Jane Doe</td>
-                                    <td>parent</td>
-                                    <td>Mobile Number</td>
-                                    <td>(555) 010-0123</td>
-                                </tr>
-                                <tr>
-                                    <td>John Doe</td>
-                                    <td>parent</td>
-                                    <td>Email</td>
-                                    <td>parent@example.com</td>
-                                </tr>
-                                <tr>
-                                    <td>Student One</td>
-                                    <td>Student</td>
-                                    <td>Email</td>
-                                    <td>student1@demo.test</td>
-                                </tr>
+                            <tbody id="profiles-tbody">
+                                <tr><td colspan="5" style="text-align: center; color: #888;">Loading students...</td></tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Section 3: Tutoring Information -->
-                    <div class="profile-section">
-                        <h3>Tutoring Information</h3>
-                        <div class="form-grid">
-                            <div>
-                                <label class="profile-label">Mentoring Type</label>
-                                <select class="profile-input"><option>Online</option></select>
-                            </div>
-                            <div>
-                                <label class="profile-label">Semesters</label>
-                                <select class="profile-input"><option>Yes</option></select>
-                            </div>
-                            <div>
-                                <label class="profile-label">Grade Level</label>
-                                <select class="profile-input"><option>10</option></select>
-                            </div>
-                            <div>
-                                <label class="profile-label">Subjects</label>
-                                <input type="text" class="profile-input" value="Math, Science">
-                            </div>
-                        </div>
+                    <div id="profile-detail" class="profile-section hidden">
+                        <h3 id="profile-detail-title">Sessions</h3>
+                        <table class="app-table">
+                            <thead><tr><th>Date</th><th>Length</th><th>Status</th></tr></thead>
+                            <tbody id="profile-detail-tbody"></tbody>
+                        </table>
                     </div>
                 </main>
                 <main id="tutor-view-invoices" class="main-area hidden">
@@ -311,97 +243,51 @@
                     </div>
 
                     <div class="invoice-toolbar">
-                        <input type="text" class="profile-input" value="July 2026" style="width: 200px; text-align: center; font-weight: 600;">
-                        <button class="btn" style="background: var(--icy-blue); color: var(--deep-navy);">⬇ Download PDF</button>
+                        <input type="month" id="invoice-month" class="profile-input" style="width: 200px; text-align: center; font-weight: 600;">
+                        <button id="btn-print-invoice" class="btn" style="background: var(--icy-blue); color: var(--deep-navy);">⬇ Print / Save PDF</button>
                     </div>
 
-                    <div class="invoice-document">
-                        
+                    <div class="invoice-document" id="invoice-document">
                         <div class="invoice-header">
                             <div>
                                 <h2 style="color: var(--champagne); margin: 0; font-family: 'Playfair Display', serif; font-size: 32px;">Demo Tutoring</h2>
                             </div>
                             <div style="text-align: right; font-size: 14px;">
                                 <span style="color: var(--icy-blue);">Invoice Period</span><br>
-                                <strong>Jul 1, 2026 to Jul 31, 2026</strong>
+                                <strong id="invoice-period">-</strong>
                             </div>
                         </div>
 
                         <div class="invoice-meta-grid">
                             <div class="meta-block">
-                                <h4>Invoice To:</h4>
-                                <p><strong>Demo Tutoring Co.</strong><br>123 Example Street<br>Sample City<br>admin@demo.test</p>
-                            </div>
-                            <div class="meta-block">
                                 <h4>Invoice From:</h4>
-                                <p><strong>Demo Tutor</strong><br>Tutor ID: 2<br>tutor@demo.test</p>
+                                <p id="invoice-from">-</p>
                             </div>
                             <div class="meta-block">
-                                <h4>Amount Remaining</h4>
-                                <p class="large-text">$0.00</p>
+                                <h4>Hourly Rate</h4>
+                                <p class="large-text" id="invoice-rate">$0.00</p>
                             </div>
                             <div class="meta-block">
-                                <h4>Invoice Status</h4>
-                                <p style="font-style: italic; color: #16a34a; font-weight: 600;">Paid</p>
+                                <h4>Total Hours</h4>
+                                <p class="large-text" id="invoice-hours">0.00</p>
+                            </div>
+                            <div class="meta-block">
+                                <h4>Amount Due</h4>
+                                <p class="large-text" id="invoice-total">$0.00</p>
                             </div>
                         </div>
 
                         <div style="padding: 20px;">
-                            <h3 style="margin-top: 0; color: var(--deep-navy);">Sessions</h3>
+                            <h3 style="margin-top: 0; color: var(--deep-navy);">Completed Sessions</h3>
                             <table class="app-table">
                                 <thead>
-                                    <tr>
-                                        <th>Student</th>
-                                        <th>Date</th>
-                                        <th>Length</th>
-                                        <th>Rate</th>
-                                        <th>Status</th>
-                                        <th style="text-align: right;">Total</th>
-                                    </tr>
+                                    <tr><th>Student</th><th>Date</th><th>Length</th><th>Rate</th><th style="text-align: right;">Total</th></tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Student One</td>
-                                        <td>Mon, Jul 6 4:00 PM</td>
-                                        <td>1 hr(s)</td>
-                                        <td>$22 / hr</td>
-                                        <td>Completed</td>
-                                        <td style="text-align: right;">$22.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Student One</td>
-                                        <td>Tue, Jul 7 4:00 PM</td>
-                                        <td>1 hr(s)</td>
-                                        <td>$22 / hr</td>
-                                        <td>Completed</td>
-                                        <td style="text-align: right;">$22.00</td>
-                                    </tr>
-                                </tbody>
+                                <tbody id="invoice-tbody"></tbody>
                             </table>
-                        </div>
-
-                        <div class="invoice-totals">
-                            <h3 style="margin-top: 0; margin-bottom: 20px; color: var(--deep-navy);">Totals</h3>
-                            <div class="total-row"><span>Sessions Subtotal:</span> <strong>$44.00</strong></div>
-                            <div class="total-row"><span>Previous Balance Subtotal:</span> <strong>$0.00</strong></div>
-                            <div class="total-row"><span>Adjustments:</span> <strong>$0.00</strong></div>
-                            <div class="total-row" style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
-                                <span>Total:</span> <strong>$44.00</strong>
-                            </div>
-                            <div class="total-row"><span>Amount Paid:</span> <strong>$44.00</strong></div>
-                            
-                            <div class="total-row highlight">
-                                <span>Amount Remaining</span>
-                                <span>$0.00</span>
-                            </div>
+                            <p style="font-size: 12px; color: #666; margin-top: 12px;">Only completed sessions are billed. Demo data only.</p>
                         </div>
                     </div>
-                    
-                    <div style="text-align: center; margin-bottom: 40px;">
-                        <p style="font-size: 12px; color: #666;">You confirm that these hours are correct.</p>
-                        <button class="btn" style="background: #16a34a; padding: 12px 40px; font-size: 16px;">Confirm</button>
-                    </div>
-
                 </main>
             </div>
         </div>

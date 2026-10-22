@@ -14,6 +14,10 @@ A full-stack, role-based tutoring management portal. Students, tutors, and admin
 
 ![Tutor calendar](docs/tutor-calendar.png)
 
+| Student profiles | Invoices |
+|---|---|
+| ![Student profiles](docs/student-profiles.png) | ![Invoices](docs/invoices.png) |
+
 | Login | Student portal | Admin control center |
 |---|---|---|
 | ![Login](docs/login.png) | ![Student portal](docs/student-portal.png) | ![Admin dashboard](docs/admin-dashboard.png) |
@@ -36,17 +40,24 @@ A full-stack, role-based tutoring management portal. Students, tutors, and admin
 - Book sessions for any tutor and student
 - Create tutor and admin accounts
 
-The *Student Profiles* and *Invoices* screens are UI prototypes with placeholder data and are not yet connected to the API.
+**Student Profiles**
+- Tutors see every student they have sessions with (admins see all students), with total, completed and upcoming session counts and the last session date
+- Click a student to see all your sessions with them
+
+**Invoices**
+- Monthly invoice built from completed sessions only, using the same hourly rate as the dashboard income cards
+- Pick any month, and print or save it as a PDF
 
 ## Tech stack
 
 | Layer | Tech |
 |---|---|
-| Frontend | HTML5, CSS3 (Grid, Flexbox, custom properties), vanilla JavaScript (Fetch API, single-page view switching) |
+| Frontend | HTML5, CSS3 (Grid, Flexbox, custom properties, print styles), vanilla JavaScript (Fetch API, single-page view switching) |
 | Backend | Node.js, Express 5 |
 | Database | MySQL (via `mysql2` with a connection pool) |
 | Auth | bcrypt password hashing, JWT (2-hour expiry) |
 | Validation | Joi |
+| Security | helmet (security headers), express-rate-limit |
 
 ## Security
 
@@ -58,6 +69,9 @@ The *Student Profiles* and *Invoices* screens are UI prototypes with placeholder
 - All request bodies validated with Joi; unknown fields are stripped
 - Every SQL query is parameterized to prevent SQL injection
 - CORS restricted to an allow-list of frontend origins
+- Login and sign-up are rate limited (20 attempts per 15 minutes per IP), and helmet sets standard security headers
+- The Student Profiles endpoint never returns password hashes, and tutors only ever see their own students
+- Text from the database is escaped before it is shown on the page, so typed HTML can't run
 - Login returns the same error for a wrong email or wrong password, so registered emails can't be discovered
 - Secrets live in `.env`, which is git-ignored; internal errors are logged on the server and never sent to the client
 
@@ -85,6 +99,7 @@ MySQL (users, sessions)
 | POST | `/sessions` | Admin, tutor | Book a session or block time |
 | PUT | `/sessions/:id` | Admin, own tutor | Update status, rating, or feedback (only the fields sent) |
 | DELETE | `/sessions/:id` | Admin, own tutor | Delete a session |
+| GET | `/students` | Admin, tutor | Student profiles with session counts. Tutor: only their own students |
 | GET | `/health` | Public | Health check |
 
 ## Running it locally
@@ -135,7 +150,6 @@ frontend/
 
 ## What I'd improve next
 
-- Connect the student profile and invoice screens to real data
+- Meeting links for the Join buttons
 - Automated API tests (Jest + Supertest)
-- Rate limiting on login and registration
 - Move the JWT from localStorage to an httpOnly cookie

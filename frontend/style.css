@@ -628,3 +628,9 @@ input:focus {
 .modal-overlay.hidden .modal-box {
     transform: translateY(-20px);
 }
+/* Print / Save PDF: only the invoice itself is printed */
+@media print {
+    body * { visibility: hidden; }
+    #invoice-document, #invoice-document * { visibility: visible; }
+    #invoice-document { position: absolute; left: 0; top: 0; width: 100%; }
+}

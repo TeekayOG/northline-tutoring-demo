@@ -1,6 +1,31 @@
 // The Global Configuration
 // The API address lives in config.js so it can change per environment without touching this file.
 const API_URL = (window.APP_CONFIG && window.APP_CONFIG.API_URL) || 'http://localhost:5000';
+// One shared hourly rate, used by both the dashboard income cards and the invoices.
+const HOURLY_RATE = (window.APP_CONFIG && window.APP_CONFIG.HOURLY_RATE) || 22;
+
+// Students the logged-in tutor works with (filled from GET /students)
+let globalStudents = [];
+
+// Escape any text from the database before putting it into the page, so typed HTML can't run.
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Show a student's email where we know it, otherwise their ID.
+function studentLabel(id) {
+    const student = globalStudents.find((s) => s.id === id);
+    return student ? escapeHtml(student.email) : `Student #${escapeHtml(id)}`;
+}
+
+function formatDateTime(value) {
+    return new Date(value).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function monthKey(value) {
+    const d = new Date(value);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 
 // Global Memory for the Calendar
 let globalSessions = []; 
@@ -46,6 +71,7 @@ loginForm.addEventListener('submit', async (e) => {
             localStorage.setItem('portal_token', data.token);
             localStorage.setItem('portal_role', data.user.role);
             localStorage.setItem('portal_user_id', data.user.id);
+            localStorage.setItem('portal_email', data.user.email);
             
             // Hide the login form
             authView.classList.add('hidden');
@@ -167,7 +193,6 @@ async function fetchSessions() {
         });
 
         const data = await response.json();
-        console.log("Raw Backend Data:", data);
 
         if (response.ok) {
             sessionList.innerHTML = ''; 
@@ -203,7 +228,9 @@ async function fetchSessions() {
                         </div>
                         <p style="margin: 5px 0;"><strong>Date:</strong> ${cleanDate}</p>
                         <p style="margin: 5px 0;"><strong>Duration:</strong> ${session.duration} minutes</p>
-                        <p style="margin: 5px 0 0 0; color: #555;"><strong>Tutor ID:</strong> ${session.tutor_id} | <strong>Student ID:</strong> ${session.student_id}</p>
+                        <p style="margin: 5px 0 0 0; color: #555;">${session.status === 'blocked'
+                            ? `<strong>Blocked time</strong>${session.notes ? ' (' + escapeHtml(session.notes) + ')' : ''} | <strong>Tutor ID:</strong> ${session.tutor_id}`
+                            : `<strong>Tutor ID:</strong> ${session.tutor_id} | <strong>Student ID:</strong> ${session.student_id}`}</p>
                     </div>
                 `;
 
@@ -224,6 +251,10 @@ document.querySelectorAll('.logout-btn').forEach(btn => {
         localStorage.removeItem('portal_token');
         localStorage.removeItem('portal_role');
         localStorage.removeItem('portal_user_id');
+        localStorage.removeItem('portal_email');
+        globalStudents = [];
+        const invoiceMonth = document.getElementById('invoice-month');
+        if (invoiceMonth) invoiceMonth.value = '';
         
         // Hide all 3 dashboards
         Object.values(dashboards).forEach(board => board.classList.add('hidden'));
@@ -285,8 +316,7 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
             }, 3000);
             
         } else {
-            console.log("Joi Bouncer Rejection Reason:", data);
-            errorText.textContent = data.error || "Failed to book session. Check console.";
+            errorText.textContent = data.details || data.error || "Failed to book session.";
             errorText.classList.remove('hidden');
         }
     } catch (error) {
@@ -310,6 +340,7 @@ async function fetchTutorSessions() {
     const token = localStorage.getItem('portal_token'); 
 
     try {
+        await loadStudents();
         const response = await fetch(`${API_URL}/sessions`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` }
@@ -345,12 +376,13 @@ async function fetchTutorSessions() {
             let projectedMins = 0;
             let earnedMins = 0;
             let totalSessions = 0;
-            let hourlyRate = 22; 
+            const hourlyRate = HOURLY_RATE;
 
             // Build the Table Rows
             actualArray.forEach(session => {
                 // Bug fix: parseInt() prevents 'NaN' crashes from bad test data
-                if (session.status !== 'cancelled') {
+                // Cancelled, missed and blocked time never count toward sessions, hours or income
+                if (!['cancelled', 'no-show', 'blocked'].includes(session.status)) {
                     const mins = parseInt(session.duration) || 0;
                     projectedMins += mins; 
                     totalSessions++;
@@ -368,11 +400,11 @@ async function fetchTutorSessions() {
                 if (sessionTime > now && session.status === 'upcoming') {
                     // FUTURE TABLE
                     tr.innerHTML = `
-                        <td class="student-name" style="white-space: nowrap;">Student #${session.student_id}</td>
+                        <td class="student-name" style="white-space: nowrap;">${studentLabel(session.student_id)}</td>
                         <td>${cleanDate}</td>
                         <td>${durationHrs} hr(s)</td>
                         <td style="text-align: right;">
-                            <button class="btn-approve" onclick="alert('Launch Classroom for Session #${session.id}')">Join</button>
+                            <button class="btn-approve" disabled title="Meeting links aren't part of this demo" style="opacity: 0.5; cursor: not-allowed;">Join</button>
                         </td>
                     `;
                     upcomingList.appendChild(tr);
@@ -381,7 +413,7 @@ async function fetchTutorSessions() {
                     // PAST TABLE (Stacked Buttons & Premium Colors)
                     feedbackCount++;
                     tr.innerHTML = `
-                        <td class="student-name" style="white-space: nowrap;">Student #${session.student_id}</td>
+                        <td class="student-name" style="white-space: nowrap;">${studentLabel(session.student_id)}</td>
                         <td style="font-size: 13px; line-height: 1.4; min-width: 110px;">${cleanDate}</td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
@@ -547,7 +579,7 @@ async function fetchStudentSessions() {
                         <p style="margin: 5px 0;"><strong>Date:</strong> ${cleanDate}</p>
                         <p style="margin: 5px 0;"><strong>Duration:</strong> ${session.duration} minutes</p>
                         
-                        <button class="btn" style="margin-top: 15px; padding: 10px; font-size: 14px;" onclick="alert('This will launch your virtual classroom!')">Join Session</button>
+                        <button class="btn" disabled title="Meeting links aren't part of this demo" style="margin-top: 15px; padding: 10px; font-size: 14px; opacity: 0.5; cursor: not-allowed;">Join Session</button>
                     </div>
                 `;
                 sessionList.appendChild(sessionDiv);
@@ -575,10 +607,6 @@ const views = {
     invoices: document.getElementById('tutor-view-invoices') 
 };
 
-// Diagnostic Check
-console.log("Checking HTML connections...");
-console.log("Invoices Button Found:", !!navLinks.invoices);
-console.log("Invoices Room Found:", !!views.invoices);
 
 function switchView(target) {
     Object.values(views).forEach(view => { if (view) view.classList.add('hidden'); });
@@ -590,12 +618,117 @@ function switchView(target) {
 
 if (navLinks.home) navLinks.home.addEventListener('click', (e) => { e.preventDefault(); switchView('home'); });
 if (navLinks.calendar) navLinks.calendar.addEventListener('click', (e) => { e.preventDefault(); switchView('calendar'); });
-if (navLinks.profiles) navLinks.profiles.addEventListener('click', (e) => { e.preventDefault(); switchView('profiles'); });
-if (navLinks.invoices) navLinks.invoices.addEventListener('click', (e) => { 
-    e.preventDefault(); 
-    console.log("Invoices clicked!");
-    switchView('invoices'); 
+if (navLinks.profiles) navLinks.profiles.addEventListener('click', (e) => { e.preventDefault(); switchView('profiles'); renderProfiles(); });
+if (navLinks.invoices) navLinks.invoices.addEventListener('click', (e) => { e.preventDefault(); switchView('invoices'); renderInvoice(); });
+
+// --- STUDENT PROFILES ---
+async function loadStudents() {
+    try {
+        const response = await fetch(`${API_URL}/students`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('portal_token')}` }
+        });
+        const data = await response.json();
+        globalStudents = response.ok ? (data.students || []) : [];
+    } catch (error) {
+        globalStudents = [];
+    }
+}
+
+async function renderProfiles() {
+    const tbody = document.getElementById('profiles-tbody');
+    document.getElementById('profile-detail').classList.add('hidden');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">Loading students...</td></tr>';
+    await loadStudents();
+
+    if (globalStudents.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">No students yet. Students appear here once you have a session with them.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = globalStudents.map((s) => `
+        <tr class="profile-row" data-student-id="${s.id}" style="cursor: pointer;">
+            <td class="student-name">${escapeHtml(s.email)}</td>
+            <td>${s.total_sessions}</td>
+            <td>${s.completed_sessions}</td>
+            <td>${s.upcoming_sessions}</td>
+            <td>${s.last_session ? formatDateTime(s.last_session) : '-'}</td>
+        </tr>`).join('');
+}
+
+// Clicking a student shows the sessions you've had with them
+document.getElementById('profiles-tbody').addEventListener('click', (e) => {
+    const row = e.target.closest('.profile-row');
+    if (!row) return;
+    const id = Number(row.dataset.studentId);
+    const student = globalStudents.find((s) => s.id === id);
+    const sessions = globalSessions
+        .filter((s) => s.student_id === id)
+        .sort((a, b) => new Date(b.session_date) - new Date(a.session_date));
+
+    document.getElementById('profile-detail-title').textContent = `Sessions with ${student ? student.email : 'Student #' + id}`;
+    document.getElementById('profile-detail-tbody').innerHTML = sessions.length
+        ? sessions.map((s) => `
+            <tr>
+                <td>${formatDateTime(s.session_date)}</td>
+                <td>${((parseFloat(s.duration) || 0) / 60).toFixed(1)} hr(s)</td>
+                <td>${escapeHtml(s.status)}</td>
+            </tr>`).join('')
+        : '<tr><td colspan="3" style="text-align: center; color: #888;">No sessions yet.</td></tr>';
+    document.getElementById('profile-detail').classList.remove('hidden');
 });
+
+// --- INVOICES (built from completed sessions only) ---
+function renderInvoice() {
+    const monthInput = document.getElementById('invoice-month');
+    const completed = globalSessions.filter((s) => s.status === 'completed');
+
+    // Default to this month, or the latest month with completed sessions if this one is empty
+    if (!monthInput.value) {
+        const now = new Date();
+        let ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        if (!completed.some((s) => monthKey(s.session_date) === ym) && completed.length) {
+            ym = completed.map((s) => monthKey(s.session_date)).sort().pop();
+        }
+        monthInput.value = ym;
+    }
+
+    const ym = monthInput.value;
+    const rows = completed
+        .filter((s) => monthKey(s.session_date) === ym)
+        .sort((a, b) => new Date(a.session_date) - new Date(b.session_date));
+
+    const [year, month] = ym.split('-').map(Number);
+    const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+    document.getElementById('invoice-period').textContent =
+        `${new Date(year, month - 1, 1).toLocaleDateString([], opts)} to ${new Date(year, month, 0).toLocaleDateString([], opts)}`;
+
+    document.getElementById('invoice-from').innerHTML =
+        `<strong>${escapeHtml(localStorage.getItem('portal_email') || 'Tutor')}</strong><br>Tutor ID: ${escapeHtml(localStorage.getItem('portal_user_id') || '-')}`;
+
+    let totalHours = 0;
+    const tbody = document.getElementById('invoice-tbody');
+    tbody.innerHTML = rows.length
+        ? rows.map((s) => {
+            const hrs = (parseFloat(s.duration) || 0) / 60;
+            totalHours += hrs;
+            return `
+            <tr>
+                <td>${studentLabel(s.student_id)}</td>
+                <td>${formatDateTime(s.session_date)}</td>
+                <td>${hrs.toFixed(2)} hr(s)</td>
+                <td>$${HOURLY_RATE.toFixed(2)}</td>
+                <td style="text-align: right;">$${(hrs * HOURLY_RATE).toFixed(2)}</td>
+            </tr>`;
+        }).join('')
+        : '<tr><td colspan="5" style="text-align: center; color: #888;">No completed sessions in this month.</td></tr>';
+
+    document.getElementById('invoice-rate').textContent = '$' + HOURLY_RATE.toFixed(2);
+    document.getElementById('invoice-hours').textContent = totalHours.toFixed(2);
+    document.getElementById('invoice-total').textContent = '$' + (totalHours * HOURLY_RATE).toFixed(2);
+}
+
+document.getElementById('invoice-month').addEventListener('change', renderInvoice);
+document.getElementById('btn-print-invoice').addEventListener('click', () => window.print());
 
 // --- STATUS UPDATE ENGINE ---
 async function updateSessionStatus(sessionId, newStatus) {
@@ -617,7 +750,6 @@ async function updateSessionStatus(sessionId, newStatus) {
         });
 
         if (response.ok) {
-            console.log(`✅ Session ${sessionId} updated to ${newStatus}`);
             // Instantly reload the dashboard to wipe it from the Feedback table!
             fetchTutorSessions(); 
         } else {
@@ -630,7 +762,6 @@ async function updateSessionStatus(sessionId, newStatus) {
 }
 
 // --- MODAL ENGINE ---
-console.log("🛠️ Loading Modal Engine...");
 
 const modalElements = {
     btnOpenSession: document.getElementById('btn-open-session'),
@@ -645,7 +776,6 @@ const modalElements = {
 // 1. Open Session Modal
 if (modalElements.btnOpenSession && modalElements.modalSession) {
     modalElements.btnOpenSession.addEventListener('click', () => {
-        console.log("🎯 '+ Add Session' button clicked!");
         modalElements.modalSession.classList.remove('hidden');
     });
 }
@@ -653,7 +783,6 @@ if (modalElements.btnOpenSession && modalElements.modalSession) {
 // 2. Open Blocked Modal
 if (modalElements.btnOpenBlocked && modalElements.modalBlocked) {
     modalElements.btnOpenBlocked.addEventListener('click', () => {
-        console.log("🎯 '+ Add Unavailability' button clicked!");
         modalElements.modalBlocked.classList.remove('hidden');
     });
 }
